@@ -1,0 +1,11 @@
+/target/
+/corpus
+/stores
+**/*.rs.bk
+Cargo.lock.bak
+.DS_Store
+*.swp
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
