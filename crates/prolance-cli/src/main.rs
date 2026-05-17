@@ -65,26 +65,33 @@ async fn ingest_one(store: &Store, path: &Path) -> Result<()> {
         .and_then(|e| e.to_str())
         .map(|s| s.to_ascii_lowercase())
         .unwrap_or_default();
-    match ext.as_str() {
-        "mzml" => {
-            let data = read_mzml(path).context("read mzml")?;
-            eprintln!(
-                "  parsed {} spectra, {} chromatograms (run_id={})",
-                data.spectra.len(),
-                data.chromatograms.len(),
-                data.run.run_id
-            );
-            store.append_run(&data.run).await?;
-            for chunk in data.spectra.chunks(2048) {
-                store.append_spectra(chunk).await?;
-            }
-            if !data.chromatograms.is_empty() {
-                store.append_chromatograms(&data.chromatograms).await?;
-            }
-            Ok(())
+    let data = match ext.as_str() {
+        "mzml" => read_mzml(path).context("read mzml")?,
+        "raw" if path.is_file() => {
+            prolance_ms::thermo::ingest(path).context("read thermo raw")?
         }
-        other => anyhow::bail!("unsupported extension: .{}", other),
+        "raw" if path.is_dir() => {
+            prolance_ms::waters::ingest(path).context("read waters raw dir")?
+        }
+        "d" if path.is_dir() => {
+            prolance_ms::bruker::ingest(path).context("read bruker .d")?
+        }
+        other => anyhow::bail!("unsupported extension/kind: .{}", other),
+    };
+    eprintln!(
+        "  parsed {} spectra, {} chromatograms (run_id={})",
+        data.spectra.len(),
+        data.chromatograms.len(),
+        data.run.run_id
+    );
+    store.append_run(&data.run).await?;
+    for chunk in data.spectra.chunks(2048) {
+        store.append_spectra(chunk).await?;
     }
+    if !data.chromatograms.is_empty() {
+        store.append_chromatograms(&data.chromatograms).await?;
+    }
+    Ok(())
 }
 
 async fn cmd_runs(store: &str) -> Result<()> {
