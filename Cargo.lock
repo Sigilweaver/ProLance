@@ -3781,10 +3781,13 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "futures",
  "indicatif",
+ "lancedb",
  "prolance-core",
  "prolance-ms",
  "serde_json",
+ "tempfile",
  "tokio",
 ]
 
