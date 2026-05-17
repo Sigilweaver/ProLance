@@ -140,7 +140,9 @@ async fn open_or_create(
 
 fn run_to_batch(runs: &[Run]) -> Result<RecordBatch> {
     let schema = runs_schema();
-    let run_id: ArrayRef = Arc::new(StringArray::from_iter_values(runs.iter().map(|r| &r.run_id)));
+    let run_id: ArrayRef = Arc::new(StringArray::from_iter_values(
+        runs.iter().map(|r| &r.run_id),
+    ));
     let src_path: ArrayRef = Arc::new(StringArray::from(
         runs.iter()
             .map(|r| r.source_path.clone())
@@ -150,10 +152,14 @@ fn run_to_batch(runs: &[Run]) -> Result<RecordBatch> {
         runs.iter().map(|r| &r.source_format),
     ));
     let instrument: ArrayRef = Arc::new(StringArray::from(
-        runs.iter().map(|r| r.instrument.clone()).collect::<Vec<_>>(),
+        runs.iter()
+            .map(|r| r.instrument.clone())
+            .collect::<Vec<_>>(),
     ));
     let start_time: ArrayRef = Arc::new(StringArray::from(
-        runs.iter().map(|r| r.start_time.clone()).collect::<Vec<_>>(),
+        runs.iter()
+            .map(|r| r.start_time.clone())
+            .collect::<Vec<_>>(),
     ));
     let ingested_at: ArrayRef = Arc::new(StringArray::from(
         runs.iter()
@@ -194,15 +200,21 @@ fn run_to_batch(runs: &[Run]) -> Result<RecordBatch> {
 fn spectra_to_batch(spectra: &[Spectrum]) -> Result<RecordBatch> {
     let schema = spectra_schema();
 
-    let run_id: ArrayRef =
-        Arc::new(StringArray::from_iter_values(spectra.iter().map(|s| &s.run_id)));
-    let scan_num: ArrayRef =
-        Arc::new(UInt32Array::from_iter_values(spectra.iter().map(|s| s.scan_num)));
-    let native_id: ArrayRef = Arc::new(StringArray::from(
-        spectra.iter().map(|s| s.native_id.clone()).collect::<Vec<_>>(),
+    let run_id: ArrayRef = Arc::new(StringArray::from_iter_values(
+        spectra.iter().map(|s| &s.run_id),
     ));
-    let ms_level: ArrayRef =
-        Arc::new(UInt8Array::from_iter_values(spectra.iter().map(|s| s.ms_level)));
+    let scan_num: ArrayRef = Arc::new(UInt32Array::from_iter_values(
+        spectra.iter().map(|s| s.scan_num),
+    ));
+    let native_id: ArrayRef = Arc::new(StringArray::from(
+        spectra
+            .iter()
+            .map(|s| s.native_id.clone())
+            .collect::<Vec<_>>(),
+    ));
+    let ms_level: ArrayRef = Arc::new(UInt8Array::from_iter_values(
+        spectra.iter().map(|s| s.ms_level),
+    ));
     let rt: ArrayRef = Arc::new(Float64Array::from(
         spectra.iter().map(|s| s.rt).collect::<Vec<_>>(),
     ));
@@ -261,7 +273,10 @@ fn spectra_to_batch(spectra: &[Spectrum]) -> Result<RecordBatch> {
             .collect::<Vec<_>>(),
     ));
     let activation: ArrayRef = Arc::new(StringArray::from(
-        spectra.iter().map(|s| s.activation.clone()).collect::<Vec<_>>(),
+        spectra
+            .iter()
+            .map(|s| s.activation.clone())
+            .collect::<Vec<_>>(),
     ));
     let ce: ArrayRef = Arc::new(Float32Array::from(
         spectra
@@ -282,19 +297,22 @@ fn spectra_to_batch(spectra: &[Spectrum]) -> Result<RecordBatch> {
             .collect::<Vec<_>>(),
     ));
     let scan_lo: ArrayRef = Arc::new(Float64Array::from(
-        spectra.iter().map(|s| s.scan_window_lower).collect::<Vec<_>>(),
+        spectra
+            .iter()
+            .map(|s| s.scan_window_lower)
+            .collect::<Vec<_>>(),
     ));
     let scan_hi: ArrayRef = Arc::new(Float64Array::from(
-        spectra.iter().map(|s| s.scan_window_upper).collect::<Vec<_>>(),
+        spectra
+            .iter()
+            .map(|s| s.scan_window_upper)
+            .collect::<Vec<_>>(),
     ));
 
     // LargeList<Float64> for m/z
-    let mut mz_builder =
-        LargeListBuilder::new(Float64Builder::new()).with_field(Arc::new(arrow_schema::Field::new(
-            "item",
-            arrow_schema::DataType::Float64,
-            false,
-        )));
+    let mut mz_builder = LargeListBuilder::new(Float64Builder::new()).with_field(Arc::new(
+        arrow_schema::Field::new("item", arrow_schema::DataType::Float64, false),
+    ));
     for s in spectra {
         for &v in &s.mz {
             mz_builder.values().append_value(v);
@@ -304,12 +322,9 @@ fn spectra_to_batch(spectra: &[Spectrum]) -> Result<RecordBatch> {
     let mz: ArrayRef = Arc::new(mz_builder.finish());
 
     // LargeList<Float32> for intensity
-    let mut int_builder =
-        LargeListBuilder::new(Float32Builder::new()).with_field(Arc::new(arrow_schema::Field::new(
-            "item",
-            arrow_schema::DataType::Float32,
-            false,
-        )));
+    let mut int_builder = LargeListBuilder::new(Float32Builder::new()).with_field(Arc::new(
+        arrow_schema::Field::new("item", arrow_schema::DataType::Float32, false),
+    ));
     for s in spectra {
         for &v in &s.intensity {
             int_builder.values().append_value(v);
@@ -319,25 +334,58 @@ fn spectra_to_batch(spectra: &[Spectrum]) -> Result<RecordBatch> {
     let intensity: ArrayRef = Arc::new(int_builder.finish());
 
     let cv: ArrayRef = Arc::new(StringArray::from(
-        spectra.iter().map(|s| s.cv_params.clone()).collect::<Vec<_>>(),
+        spectra
+            .iter()
+            .map(|s| s.cv_params.clone())
+            .collect::<Vec<_>>(),
     ));
 
     Ok(RecordBatch::try_new(
         schema,
         vec![
-            run_id, scan_num, native_id, ms_level, rt, tic, bp_mz, bp_int, polarity, centroided,
-            prec_mz, prec_charge, prec_int, iso_tgt, iso_lo, iso_hi, activation, ce, im, mz_prec,
-            int_prec, scan_lo, scan_hi, mz, intensity, cv,
+            run_id,
+            scan_num,
+            native_id,
+            ms_level,
+            rt,
+            tic,
+            bp_mz,
+            bp_int,
+            polarity,
+            centroided,
+            prec_mz,
+            prec_charge,
+            prec_int,
+            iso_tgt,
+            iso_lo,
+            iso_hi,
+            activation,
+            ce,
+            im,
+            mz_prec,
+            int_prec,
+            scan_lo,
+            scan_hi,
+            mz,
+            intensity,
+            cv,
         ],
     )?)
 }
 
 fn chromatograms_to_batch(chroms: &[Chromatogram]) -> Result<RecordBatch> {
     let schema = chromatograms_schema();
-    let run_id: ArrayRef = Arc::new(StringArray::from_iter_values(chroms.iter().map(|c| &c.run_id)));
-    let cid: ArrayRef = Arc::new(StringArray::from_iter_values(chroms.iter().map(|c| &c.chrom_id)));
+    let run_id: ArrayRef = Arc::new(StringArray::from_iter_values(
+        chroms.iter().map(|c| &c.run_id),
+    ));
+    let cid: ArrayRef = Arc::new(StringArray::from_iter_values(
+        chroms.iter().map(|c| &c.chrom_id),
+    ));
     let ctype: ArrayRef = Arc::new(StringArray::from(
-        chroms.iter().map(|c| c.chrom_type.clone()).collect::<Vec<_>>(),
+        chroms
+            .iter()
+            .map(|c| c.chrom_type.clone())
+            .collect::<Vec<_>>(),
     ));
     let pmz: ArrayRef = Arc::new(Float64Array::from(
         chroms.iter().map(|c| c.precursor_mz).collect::<Vec<_>>(),
@@ -369,7 +417,10 @@ fn chromatograms_to_batch(chroms: &[Chromatogram]) -> Result<RecordBatch> {
     let intensity: ArrayRef = Arc::new(i_builder.finish());
 
     let cv: ArrayRef = Arc::new(StringArray::from(
-        chroms.iter().map(|c| c.cv_params.clone()).collect::<Vec<_>>(),
+        chroms
+            .iter()
+            .map(|c| c.cv_params.clone())
+            .collect::<Vec<_>>(),
     ));
 
     Ok(RecordBatch::try_new(

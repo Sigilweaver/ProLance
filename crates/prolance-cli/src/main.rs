@@ -6,7 +6,11 @@ use prolance_core::{batches_to_chromatograms, batches_to_runs, batches_to_spectr
 use prolance_ms::mzml::{read_mzml, write_mzml};
 
 #[derive(Parser)]
-#[command(name = "prolance", version, about = "Columnar mass spectrometry storage")]
+#[command(
+    name = "prolance",
+    version,
+    about = "Columnar mass spectrometry storage"
+)]
 struct Cli {
     #[command(subcommand)]
     cmd: Cmd,
@@ -67,16 +71,22 @@ async fn ingest_one(store: &Store, path: &Path) -> Result<()> {
         .unwrap_or_default();
     let data = match ext.as_str() {
         "mzml" => read_mzml(path).context("read mzml")?,
+        #[cfg(feature = "thermo")]
         "raw" if path.is_file() => {
             prolance_ms::thermo::ingest(path).context("read thermo raw")?
         }
+        #[cfg(feature = "waters")]
         "raw" if path.is_dir() => {
             prolance_ms::waters::ingest(path).context("read waters raw dir")?
         }
+        #[cfg(feature = "bruker")]
         "d" if path.is_dir() => {
             prolance_ms::bruker::ingest(path).context("read bruker .d")?
         }
-        other => anyhow::bail!("unsupported extension/kind: .{}", other),
+        other => anyhow::bail!(
+            "unsupported extension/kind: .{} (build with --features all-vendors to enable vendor adapters)",
+            other
+        ),
     };
     eprintln!(
         "  parsed {} spectra, {} chromatograms (run_id={})",

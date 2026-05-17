@@ -166,9 +166,9 @@ fn write_spectrum<W: Write>(out: &mut W, s: &Spectrum, idx: usize) -> MsResult<(
         .clone()
         .unwrap_or_else(|| format!("scan={}", idx + 1));
     let n = s.mz.len().max(s.intensity.len());
-    write!(
+    writeln!(
         out,
-        "      <spectrum index=\"{}\" id=\"{}\" defaultArrayLength=\"{}\">\n",
+        "      <spectrum index=\"{}\" id=\"{}\" defaultArrayLength=\"{}\">",
         idx,
         xml_escape(&id),
         n
@@ -184,50 +184,50 @@ fn write_spectrum<W: Write>(out: &mut W, s: &Spectrum, idx: usize) -> MsResult<(
     write_extras(out, &extra, "spectrum")?;
 
     // scanList
-    write!(out, "        <scanList count=\"1\">\n")?;
+    writeln!(out, "        <scanList count=\"1\">")?;
     write_cv(out, "MS:1000795", "no combination", None, None)?;
-    write!(out, "          <scan>\n")?;
+    writeln!(out, "          <scan>")?;
     if let Some(rt) = s.rt {
-        write!(
+        writeln!(
             out,
-            "            <cvParam cvRef=\"MS\" accession=\"MS:1000016\" name=\"scan start time\" value=\"{}\" unitCvRef=\"UO\" unitAccession=\"UO:0000010\" unitName=\"second\"/>\n",
+            "            <cvParam cvRef=\"MS\" accession=\"MS:1000016\" name=\"scan start time\" value=\"{}\" unitCvRef=\"UO\" unitAccession=\"UO:0000010\" unitName=\"second\"/>",
             rt
         )?;
     }
     if let Some(im) = s.inv_mobility {
-        write!(
+        writeln!(
             out,
-            "            <cvParam cvRef=\"MS\" accession=\"MS:1002476\" name=\"ion mobility drift time\" value=\"{}\"/>\n",
+            "            <cvParam cvRef=\"MS\" accession=\"MS:1002476\" name=\"ion mobility drift time\" value=\"{}\"/>",
             im
         )?;
     }
     write_extras(out, &extra, "scan")?;
     if s.scan_window_lower.is_some() || s.scan_window_upper.is_some() {
-        write!(out, "            <scanWindowList count=\"1\"><scanWindow>\n")?;
+        writeln!(out, "            <scanWindowList count=\"1\"><scanWindow>")?;
         if let Some(v) = s.scan_window_lower {
-            write!(
+            writeln!(
                 out,
-                "              <cvParam cvRef=\"MS\" accession=\"MS:1000501\" name=\"scan window lower limit\" value=\"{}\" unitCvRef=\"MS\" unitAccession=\"MS:1000040\" unitName=\"m/z\"/>\n",
+                "              <cvParam cvRef=\"MS\" accession=\"MS:1000501\" name=\"scan window lower limit\" value=\"{}\" unitCvRef=\"MS\" unitAccession=\"MS:1000040\" unitName=\"m/z\"/>",
                 v
             )?;
         }
         if let Some(v) = s.scan_window_upper {
-            write!(
+            writeln!(
                 out,
-                "              <cvParam cvRef=\"MS\" accession=\"MS:1000500\" name=\"scan window upper limit\" value=\"{}\" unitCvRef=\"MS\" unitAccession=\"MS:1000040\" unitName=\"m/z\"/>\n",
+                "              <cvParam cvRef=\"MS\" accession=\"MS:1000500\" name=\"scan window upper limit\" value=\"{}\" unitCvRef=\"MS\" unitAccession=\"MS:1000040\" unitName=\"m/z\"/>",
                 v
             )?;
         }
         write_extras(out, &extra, "scanWindow")?;
-        write!(out, "            </scanWindow></scanWindowList>\n")?;
+        writeln!(out, "            </scanWindow></scanWindowList>")?;
     }
-    write!(out, "          </scan>\n")?;
-    write!(out, "        </scanList>\n")?;
+    writeln!(out, "          </scan>")?;
+    writeln!(out, "        </scanList>")?;
 
     if let Some(p) = &s.precursor {
-        write!(out, "        <precursorList count=\"1\">\n")?;
-        write!(out, "          <precursor>\n")?;
-        write!(out, "            <isolationWindow>\n")?;
+        writeln!(out, "        <precursorList count=\"1\">")?;
+        writeln!(out, "          <precursor>")?;
+        writeln!(out, "            <isolationWindow>")?;
         if let Some(v) = p.isolation_window_target {
             write_cv(
                 out,
@@ -256,8 +256,11 @@ fn write_spectrum<W: Write>(out: &mut W, s: &Spectrum, idx: usize) -> MsResult<(
             )?;
         }
         write_extras(out, &extra, "isolationWindow")?;
-        write!(out, "            </isolationWindow>\n")?;
-        write!(out, "            <selectedIonList count=\"1\"><selectedIon>\n")?;
+        writeln!(out, "            </isolationWindow>")?;
+        writeln!(
+            out,
+            "            <selectedIonList count=\"1\"><selectedIon>"
+        )?;
         if let Some(v) = p.mz {
             write_cv(
                 out,
@@ -268,14 +271,26 @@ fn write_spectrum<W: Write>(out: &mut W, s: &Spectrum, idx: usize) -> MsResult<(
             )?;
         }
         if let Some(v) = p.charge {
-            write_cv(out, "MS:1000041", "charge state", Some(&v.to_string()), None)?;
+            write_cv(
+                out,
+                "MS:1000041",
+                "charge state",
+                Some(&v.to_string()),
+                None,
+            )?;
         }
         if let Some(v) = p.intensity {
-            write_cv(out, "MS:1000042", "peak intensity", Some(&v.to_string()), None)?;
+            write_cv(
+                out,
+                "MS:1000042",
+                "peak intensity",
+                Some(&v.to_string()),
+                None,
+            )?;
         }
         write_extras(out, &extra, "selectedIon")?;
-        write!(out, "            </selectedIon></selectedIonList>\n")?;
-        write!(out, "            <activation>\n")?;
+        writeln!(out, "            </selectedIon></selectedIonList>")?;
+        writeln!(out, "            <activation>")?;
         if let Some(a) = &s.activation {
             let (acc, name) = activation_terms(a);
             write_cv(out, acc, name, None, None)?;
@@ -290,15 +305,15 @@ fn write_spectrum<W: Write>(out: &mut W, s: &Spectrum, idx: usize) -> MsResult<(
             )?;
         }
         write_extras(out, &extra, "activation")?;
-        write!(out, "            </activation>\n")?;
-        write!(out, "          </precursor>\n")?;
-        write!(out, "        </precursorList>\n")?;
+        writeln!(out, "            </activation>")?;
+        writeln!(out, "          </precursor>")?;
+        writeln!(out, "        </precursorList>")?;
     }
 
     // binary data arrays
     let mz_prec = s.mz_precision.unwrap_or(64);
     let int_prec = s.intensity_precision.unwrap_or(32);
-    write!(out, "        <binaryDataArrayList count=\"2\">\n")?;
+    writeln!(out, "        <binaryDataArrayList count=\"2\">")?;
     write_binary_array_f64(out, &s.mz, mz_prec, "MS:1000514", "m/z array", true)?;
     write_binary_array_f32(
         out,
@@ -308,8 +323,8 @@ fn write_spectrum<W: Write>(out: &mut W, s: &Spectrum, idx: usize) -> MsResult<(
         "intensity array",
         true,
     )?;
-    write!(out, "        </binaryDataArrayList>\n")?;
-    write!(out, "      </spectrum>\n")?;
+    writeln!(out, "        </binaryDataArrayList>")?;
+    writeln!(out, "      </spectrum>")?;
     Ok(())
 }
 
@@ -319,7 +334,13 @@ fn write_spectrum_top_cv<W: Write>(out: &mut W, s: &Spectrum) -> MsResult<()> {
     } else if s.ms_level >= 2 {
         write_cv(out, "MS:1000580", "MSn spectrum", None, None)?;
     }
-    write_cv(out, "MS:1000511", "ms level", Some(&s.ms_level.to_string()), None)?;
+    write_cv(
+        out,
+        "MS:1000511",
+        "ms level",
+        Some(&s.ms_level.to_string()),
+        None,
+    )?;
     match s.polarity {
         Some(1) => write_cv(out, "MS:1000130", "positive scan", None, None)?,
         Some(-1) => write_cv(out, "MS:1000129", "negative scan", None, None)?,
@@ -331,7 +352,13 @@ fn write_spectrum_top_cv<W: Write>(out: &mut W, s: &Spectrum) -> MsResult<()> {
         _ => {}
     }
     if let Some(v) = s.tic {
-        write_cv(out, "MS:1000285", "total ion current", Some(&v.to_string()), None)?;
+        write_cv(
+            out,
+            "MS:1000285",
+            "total ion current",
+            Some(&v.to_string()),
+            None,
+        )?;
     }
     if let Some(v) = s.base_peak_mz {
         write_cv(
@@ -356,18 +383,36 @@ fn write_spectrum_top_cv<W: Write>(out: &mut W, s: &Spectrum) -> MsResult<()> {
 
 fn write_chromatogram<W: Write>(out: &mut W, c: &Chromatogram, idx: usize) -> MsResult<()> {
     let n = c.time.len().max(c.intensity.len());
-    write!(
+    writeln!(
         out,
-        "      <chromatogram index=\"{}\" id=\"{}\" defaultArrayLength=\"{}\">\n",
+        "      <chromatogram index=\"{}\" id=\"{}\" defaultArrayLength=\"{}\">",
         idx,
         xml_escape(&c.chrom_id),
         n
     )?;
     match c.chrom_type.as_deref() {
-        Some("TIC") => write_cv(out, "MS:1000235", "total ion current chromatogram", None, None)?,
-        Some("SIC") => write_cv(out, "MS:1000627", "selected ion current chromatogram", None, None)?,
+        Some("TIC") => write_cv(
+            out,
+            "MS:1000235",
+            "total ion current chromatogram",
+            None,
+            None,
+        )?,
+        Some("SIC") => write_cv(
+            out,
+            "MS:1000627",
+            "selected ion current chromatogram",
+            None,
+            None,
+        )?,
         Some("BPC") => write_cv(out, "MS:1000628", "basepeak chromatogram", None, None)?,
-        Some("SRM") => write_cv(out, "MS:1001473", "selected reaction monitoring chromatogram", None, None)?,
+        Some("SRM") => write_cv(
+            out,
+            "MS:1001473",
+            "selected reaction monitoring chromatogram",
+            None,
+            None,
+        )?,
         _ => {}
     }
     let extras: Vec<CvParam> = match c.cv_params.as_deref() {
@@ -376,25 +421,11 @@ fn write_chromatogram<W: Write>(out: &mut W, c: &Chromatogram, idx: usize) -> Ms
     };
     write_extras(out, &extras, "chromatogram")?;
 
-    write!(out, "        <binaryDataArrayList count=\"2\">\n")?;
-    write_binary_array_f32(
-        out,
-        &c.time,
-        32,
-        "MS:1000595",
-        "time array",
-        true,
-    )?;
-    write_binary_array_f32(
-        out,
-        &c.intensity,
-        32,
-        "MS:1000515",
-        "intensity array",
-        true,
-    )?;
-    write!(out, "        </binaryDataArrayList>\n")?;
-    write!(out, "      </chromatogram>\n")?;
+    writeln!(out, "        <binaryDataArrayList count=\"2\">")?;
+    write_binary_array_f32(out, &c.time, 32, "MS:1000595", "time array", true)?;
+    write_binary_array_f32(out, &c.intensity, 32, "MS:1000515", "intensity array", true)?;
+    writeln!(out, "        </binaryDataArrayList>")?;
+    writeln!(out, "      </chromatogram>")?;
     Ok(())
 }
 
@@ -405,20 +436,35 @@ fn write_cv<W: Write>(
     value: Option<&str>,
     unit: Option<(&str, &str, &str)>,
 ) -> MsResult<()> {
-    write!(out, "        <cvParam cvRef=\"MS\" accession=\"{}\" name=\"{}\"", acc, xml_escape(name))?;
+    write!(
+        out,
+        "        <cvParam cvRef=\"MS\" accession=\"{}\" name=\"{}\"",
+        acc,
+        xml_escape(name)
+    )?;
     if let Some(v) = value {
         write!(out, " value=\"{}\"", xml_escape(v))?;
     }
     if let Some((ua, un, ucv)) = unit {
-        write!(out, " unitCvRef=\"{}\" unitAccession=\"{}\" unitName=\"{}\"", ucv, ua, xml_escape(un))?;
+        write!(
+            out,
+            " unitCvRef=\"{}\" unitAccession=\"{}\" unitName=\"{}\"",
+            ucv,
+            ua,
+            xml_escape(un)
+        )?;
     }
-    write!(out, "/>\n")?;
+    writeln!(out, "/>")?;
     Ok(())
 }
 
 fn write_extras<W: Write>(out: &mut W, extras: &[CvParam], section: &str) -> MsResult<()> {
     for cv in extras.iter().filter(|c| c.section == section) {
-        let tag = if cv.kind == "user" { "userParam" } else { "cvParam" };
+        let tag = if cv.kind == "user" {
+            "userParam"
+        } else {
+            "cvParam"
+        };
         write!(out, "        <{}", tag)?;
         if let Some(v) = &cv.cv_ref {
             write!(out, " cvRef=\"{}\"", xml_escape(v))?;
@@ -443,7 +489,7 @@ fn write_extras<W: Write>(out: &mut W, extras: &[CvParam], section: &str) -> MsR
         if let Some(v) = &cv.unit_name {
             write!(out, " unitName=\"{}\"", xml_escape(v))?;
         }
-        write!(out, "/>\n")?;
+        writeln!(out, "/>")?;
     }
     Ok(())
 }
@@ -506,7 +552,11 @@ fn write_binary_array_f64<W: Write>(
     }
     let payload = if zlib { encode_zlib(&buf)? } else { buf };
     let encoded = base64::engine::general_purpose::STANDARD.encode(&payload);
-    write!(out, "          <binaryDataArray encodedLength=\"{}\">\n", encoded.len())?;
+    writeln!(
+        out,
+        "          <binaryDataArray encodedLength=\"{}\">",
+        encoded.len()
+    )?;
     let prec_term = if precision == 64 {
         ("MS:1000523", "64-bit float")
     } else {
@@ -519,8 +569,8 @@ fn write_binary_array_f64<W: Write>(
         write_cv(out, "MS:1000576", "no compression", None, None)?;
     }
     write_cv(out, accession, name, None, None)?;
-    write!(out, "            <binary>{}</binary>\n", encoded)?;
-    write!(out, "          </binaryDataArray>\n")?;
+    writeln!(out, "            <binary>{}</binary>", encoded)?;
+    writeln!(out, "          </binaryDataArray>")?;
     Ok(())
 }
 
@@ -548,7 +598,11 @@ fn write_binary_array_f32<W: Write>(
     }
     let payload = if zlib { encode_zlib(&buf)? } else { buf };
     let encoded = base64::engine::general_purpose::STANDARD.encode(&payload);
-    write!(out, "          <binaryDataArray encodedLength=\"{}\">\n", encoded.len())?;
+    writeln!(
+        out,
+        "          <binaryDataArray encodedLength=\"{}\">",
+        encoded.len()
+    )?;
     let prec_term = if precision == 64 {
         ("MS:1000523", "64-bit float")
     } else {
@@ -561,8 +615,8 @@ fn write_binary_array_f32<W: Write>(
         write_cv(out, "MS:1000576", "no compression", None, None)?;
     }
     write_cv(out, accession, name, None, None)?;
-    write!(out, "            <binary>{}</binary>\n", encoded)?;
-    write!(out, "          </binaryDataArray>\n")?;
+    writeln!(out, "            <binary>{}</binary>", encoded)?;
+    writeln!(out, "          </binaryDataArray>")?;
     Ok(())
 }
 
@@ -596,9 +650,9 @@ fn write_indexed<W: Write>(
     full.extend_from_slice(b"  <index name=\"spectrum\">\n");
     for (id, off) in spec_offsets {
         let absolute = off + decl.len() + shift;
-        write!(
+        writeln!(
             full,
-            "    <offset idRef=\"{}\">{}</offset>\n",
+            "    <offset idRef=\"{}\">{}</offset>",
             xml_escape(id),
             absolute
         )?;
@@ -608,9 +662,9 @@ fn write_indexed<W: Write>(
         full.extend_from_slice(b"  <index name=\"chromatogram\">\n");
         for (id, off) in chrom_offsets {
             let absolute = off + decl.len() + shift;
-            write!(
+            writeln!(
                 full,
-                "    <offset idRef=\"{}\">{}</offset>\n",
+                "    <offset idRef=\"{}\">{}</offset>",
                 xml_escape(id),
                 absolute
             )?;
@@ -618,7 +672,7 @@ fn write_indexed<W: Write>(
         full.extend_from_slice(b"  </index>\n");
     }
     full.extend_from_slice(b"</indexList>\n");
-    write!(full, "<indexListOffset>{}</indexListOffset>\n", index_offset)?;
+    writeln!(full, "<indexListOffset>{}</indexListOffset>", index_offset)?;
 
     // The SHA-1 checksum is over everything up through "<fileChecksum>"
     // (inclusive of the opening tag). We compute by appending the opening

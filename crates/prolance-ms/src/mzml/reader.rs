@@ -105,10 +105,7 @@ pub fn parse_bytes(bytes: &[u8], source_path: String) -> MsResult<MzmlData> {
     };
     extract_run_attrs(&verbatim.prefix, &mut run);
 
-    let spectra = parse_spectra(
-        &bytes[spec_list_open_end + 1..spec_list_close],
-        &run_id,
-    )?;
+    let spectra = parse_spectra(&bytes[spec_list_open_end + 1..spec_list_close], &run_id)?;
     let chromatograms = if let Some(cls) = chrom_list_open_start {
         let cls_end = find_tag_close(bytes, cls).unwrap();
         let chrom_close = find_subslice(bytes, b"</chromatogramList>", cls_end + 1).unwrap();
@@ -159,7 +156,7 @@ fn strip_indexed_prefix(prefix: &[u8]) -> String {
 
 fn trim_leading_ws_keeping_xml_decl(s: &str) -> String {
     // Drop a single leading newline if present (from the indexedmzML strip).
-    let trimmed = s.trim_start_matches(|c: char| c == '\n' || c == '\r');
+    let trimmed = s.trim_start_matches(['\n', '\r']);
     trimmed.to_string()
 }
 
@@ -320,12 +317,10 @@ fn parse_one_spectrum(xml: &str, run_id: &str) -> MsResult<Spectrum> {
                     );
                 }
             }
-            Event::Text(t) => {
-                if stack.last().map(|s| s.as_str()) == Some("binary") {
-                    if let Some(state) = current_binary.as_mut() {
-                        let txt = t.unescape().unwrap_or_default().to_string();
-                        state.base64.push_str(txt.trim());
-                    }
+            Event::Text(t) if stack.last().map(|s| s.as_str()) == Some("binary") => {
+                if let Some(state) = current_binary.as_mut() {
+                    let txt = t.unescape().unwrap_or_default().to_string();
+                    state.base64.push_str(txt.trim());
                 }
             }
             Event::Eof => break,
@@ -381,7 +376,11 @@ impl CvParam {
 
 fn parse_cv(e: &BytesStart, kind: &str) -> MsResult<CvParam> {
     let mut cv = CvParam {
-        kind: if kind == "cvParam" { "cv".into() } else { "user".into() },
+        kind: if kind == "cvParam" {
+            "cv".into()
+        } else {
+            "user".into()
+        },
         ..Default::default()
     };
     for attr in e.attributes() {
@@ -567,7 +566,8 @@ impl BinaryArrayState {
         if matches!(self.kind, BinaryKind::Other) {
             return Ok(());
         }
-        let raw = base64::engine::general_purpose::STANDARD.decode(self.base64.trim().as_bytes())?;
+        let raw =
+            base64::engine::general_purpose::STANDARD.decode(self.base64.trim().as_bytes())?;
         let bytes = if self.zlib {
             let mut d = ZlibDecoder::new(&raw[..]);
             let mut out = Vec::with_capacity(raw.len() * 4);
@@ -576,7 +576,11 @@ impl BinaryArrayState {
         } else {
             raw
         };
-        let precision = if self.precision == 0 { 64 } else { self.precision };
+        let precision = if self.precision == 0 {
+            64
+        } else {
+            self.precision
+        };
         match self.kind {
             BinaryKind::Mz => {
                 spec.mz = decode_floats_f64(&bytes, precision)?;
@@ -595,7 +599,8 @@ impl BinaryArrayState {
         if self.unsupported.is_some() {
             return Err(MsError::Unsupported("compression not supported".into()));
         }
-        let raw = base64::engine::general_purpose::STANDARD.decode(self.base64.trim().as_bytes())?;
+        let raw =
+            base64::engine::general_purpose::STANDARD.decode(self.base64.trim().as_bytes())?;
         let bytes = if self.zlib {
             let mut d = ZlibDecoder::new(&raw[..]);
             let mut out = Vec::with_capacity(raw.len() * 4);
@@ -604,7 +609,11 @@ impl BinaryArrayState {
         } else {
             raw
         };
-        let precision = if self.precision == 0 { 64 } else { self.precision };
+        let precision = if self.precision == 0 {
+            64
+        } else {
+            self.precision
+        };
         match self.kind {
             BinaryKind::Mz => chrom.time = decode_floats_f32(&bytes, precision)?,
             BinaryKind::Intensity => chrom.intensity = decode_floats_f32(&bytes, precision)?,
@@ -618,7 +627,9 @@ fn decode_floats_f64(bytes: &[u8], precision: u8) -> MsResult<Vec<f64>> {
     match precision {
         64 => {
             if bytes.len() % 8 != 0 {
-                return Err(MsError::Malformed("f64 array length not multiple of 8".into()));
+                return Err(MsError::Malformed(
+                    "f64 array length not multiple of 8".into(),
+                ));
             }
             Ok(bytes
                 .chunks_exact(8)
@@ -627,14 +638,19 @@ fn decode_floats_f64(bytes: &[u8], precision: u8) -> MsResult<Vec<f64>> {
         }
         32 => {
             if bytes.len() % 4 != 0 {
-                return Err(MsError::Malformed("f32 array length not multiple of 4".into()));
+                return Err(MsError::Malformed(
+                    "f32 array length not multiple of 4".into(),
+                ));
             }
             Ok(bytes
                 .chunks_exact(4)
                 .map(|c| f32::from_le_bytes(c.try_into().unwrap()) as f64)
                 .collect())
         }
-        _ => Err(MsError::Malformed(format!("unknown precision {}", precision))),
+        _ => Err(MsError::Malformed(format!(
+            "unknown precision {}",
+            precision
+        ))),
     }
 }
 
@@ -642,7 +658,9 @@ fn decode_floats_f32(bytes: &[u8], precision: u8) -> MsResult<Vec<f32>> {
     match precision {
         64 => {
             if bytes.len() % 8 != 0 {
-                return Err(MsError::Malformed("f64 array length not multiple of 8".into()));
+                return Err(MsError::Malformed(
+                    "f64 array length not multiple of 8".into(),
+                ));
             }
             Ok(bytes
                 .chunks_exact(8)
@@ -651,14 +669,19 @@ fn decode_floats_f32(bytes: &[u8], precision: u8) -> MsResult<Vec<f32>> {
         }
         32 => {
             if bytes.len() % 4 != 0 {
-                return Err(MsError::Malformed("f32 array length not multiple of 4".into()));
+                return Err(MsError::Malformed(
+                    "f32 array length not multiple of 4".into(),
+                ));
             }
             Ok(bytes
                 .chunks_exact(4)
                 .map(|c| f32::from_le_bytes(c.try_into().unwrap()))
                 .collect())
         }
-        _ => Err(MsError::Malformed(format!("unknown precision {}", precision))),
+        _ => Err(MsError::Malformed(format!(
+            "unknown precision {}",
+            precision
+        ))),
     }
 }
 
@@ -764,12 +787,10 @@ fn parse_one_chromatogram(xml: &str, run_id: &str) -> MsResult<Chromatogram> {
                     }
                 }
             }
-            Event::Text(t) => {
-                if stack.last().map(|s| s.as_str()) == Some("binary") {
-                    if let Some(b) = current_binary.as_mut() {
-                        let txt = t.unescape().unwrap_or_default().to_string();
-                        b.base64.push_str(txt.trim());
-                    }
+            Event::Text(t) if stack.last().map(|s| s.as_str()) == Some("binary") => {
+                if let Some(b) = current_binary.as_mut() {
+                    let txt = t.unescape().unwrap_or_default().to_string();
+                    b.base64.push_str(txt.trim());
                 }
             }
             Event::Eof => break,

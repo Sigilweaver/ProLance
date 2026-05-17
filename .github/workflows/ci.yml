@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ProLance
+        uses: actions/checkout@v4
+        with:
+          path: ProLance
+
+      # Vendor crates are sibling path dependencies. They must be present
+      # for cargo to resolve the workspace, even when vendor features are
+      # disabled. CI checks out each sibling repo from the same owner.
+      - name: Checkout OpenTFRaw
+        uses: actions/checkout@v4
+        with:
+          repository: Sigilweaver/OpenTFRaw
+          path: OpenTFRaw
+
+      - name: Checkout OpenTDF
+        uses: actions/checkout@v4
+        with:
+          repository: Sigilweaver/OpenTimsTDF
+          path: OpenTDF
+
+      - name: Checkout OpenWRaw
+        uses: actions/checkout@v4
+        with:
+          repository: Sigilweaver/OpenWRaw
+          path: OpenWRaw
+
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ProLance
+
+      - name: cargo fmt
+        working-directory: ProLance
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy (default features)
+        working-directory: ProLance
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: cargo clippy (all vendor features)
+        working-directory: ProLance
+        run: cargo clippy --workspace --all-targets --features all-vendors -- -D warnings
+
+      - name: cargo test (default features)
+        working-directory: ProLance
+        run: cargo test --workspace --all-targets
+        env:
+          # Skip corpus-dependent tests in CI; they no-op when the path is absent.
+          PROLANCE_RUN_CORPUS_TESTS: "0"
+
+      - name: cargo test (thermo feature)
+        working-directory: ProLance
+        run: cargo test -p prolance-ms --features thermo --test thermo_adapter

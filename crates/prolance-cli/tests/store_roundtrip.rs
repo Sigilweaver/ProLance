@@ -35,7 +35,10 @@ async fn store_roundtrip_real_thermo_if_present() {
     let run = runs.into_iter().next().unwrap();
     let spec_batches = store.read_spectra(&original.run.run_id).await.unwrap();
     let spectra = batches_to_spectra(&spec_batches);
-    let chrom_batches = store.read_chromatograms(&original.run.run_id).await.unwrap();
+    let chrom_batches = store
+        .read_chromatograms(&original.run.run_id)
+        .await
+        .unwrap();
     let chromatograms = batches_to_chromatograms(&chrom_batches);
 
     assert_eq!(spectra.len(), original.spectra.len());
@@ -57,7 +60,12 @@ async fn store_roundtrip_real_thermo_if_present() {
         let b = &reread.spectra[i];
         assert_eq!(a.ms_level, b.ms_level);
         assert_eq!(a.mz.len(), b.mz.len(), "mz len mismatch at {}", i);
-        assert_eq!(a.intensity.len(), b.intensity.len(), "int len mismatch at {}", i);
+        assert_eq!(
+            a.intensity.len(),
+            b.intensity.len(),
+            "int len mismatch at {}",
+            i
+        );
         if let (Some(ra), Some(rb)) = (a.rt, b.rt) {
             assert!((ra - rb).abs() < 1e-6, "rt mismatch at {}", i);
         }

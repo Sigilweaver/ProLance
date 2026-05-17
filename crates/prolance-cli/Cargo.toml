@@ -13,9 +13,16 @@ homepage.workspace     = true
 name = "prolance"
 path = "src/main.rs"
 
+[features]
+default = []
+thermo  = ["prolance-ms/thermo"]
+bruker  = ["prolance-ms/bruker"]
+waters  = ["prolance-ms/waters"]
+all-vendors = ["thermo", "bruker", "waters"]
+
 [dependencies]
 prolance-core = { workspace = true }
-prolance-ms   = { workspace = true, features = ["all-vendors"] }
+prolance-ms   = { workspace = true }
 clap          = { workspace = true }
 tokio         = { workspace = true }
 anyhow        = { workspace = true }
