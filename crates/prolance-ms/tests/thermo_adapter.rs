@@ -31,7 +31,11 @@ fn thermo_ingest_small_raw() {
         // Every spectrum should have an RT, polarity, and centroid flag set
         // by the direct path; the mzML path also guarantees these on Thermo.
         assert!(s.rt.is_some(), "spectrum {} missing rt", s.scan_num);
-        assert!(s.polarity.is_some(), "spectrum {} missing polarity", s.scan_num);
+        assert!(
+            s.polarity.is_some(),
+            "spectrum {} missing polarity",
+            s.scan_num
+        );
         assert!(
             s.native_id.as_deref().unwrap_or("").contains("scan="),
             "native_id should be Thermo controller id"
@@ -47,4 +51,3 @@ fn thermo_ingest_small_raw() {
         ms2
     );
 }
-
