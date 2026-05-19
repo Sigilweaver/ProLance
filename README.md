@@ -1,5 +1,13 @@
 # ProLance
 
+> Part of the [OpenProteo](https://sigilweaver.app/openproteo/docs/)
+> stack for proteomics raw-file access. ProLance is the columnar
+> storage layer; vendor readers
+> [OpenWRaw](https://github.com/Sigilweaver/OpenWRaw),
+> [OpenTFRaw](https://github.com/Sigilweaver/OpenTFRaw), and
+> [OpenTimsTDF](https://github.com/Sigilweaver/OpenTDF) feed it
+> through [openproteo-io](https://github.com/Sigilweaver/OpenProteo).
+
 A fast, columnar, memory-mapped mass spectrometry data store powered by [Lance].
 
 ProLance is a **storage format**, not an analysis framework. Its purpose is to
