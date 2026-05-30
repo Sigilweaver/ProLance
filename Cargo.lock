@@ -3566,14 +3566,16 @@ checksum = "269bca4c2591a28585d6bf10d9ed0332b7d76900a1b02bec41bdc3a2cdcda107"
 
 [[package]]
 name = "openproteo-core"
-version = "0.1.0"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75e2005b619c6f1087cc4304465dba88de1294e57d6b1f6676ccd1ab0d124e90"
 dependencies = [
  "thiserror",
 ]
 
 [[package]]
 name = "openproteo-io"
-version = "0.1.0"
+version = "1.0.4-dev"
 dependencies = [
  "openproteo-core",
  "opentfraw",
@@ -3590,7 +3592,9 @@ checksum = "7c87def4c32ab89d880effc9e097653c8da5d6ef28e6b539d313baaacfbafcbe"
 
 [[package]]
 name = "opentfraw"
-version = "1.0.4"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "448bc9fb527d9b047d95fb6662be4db368ed17ee31e89f577350e53c2c03d0f4"
 dependencies = [
  "openproteo-core",
  "thiserror",
@@ -3598,7 +3602,9 @@ dependencies = [
 
 [[package]]
 name = "opentimstdf"
-version = "1.0.4"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fdc92ee3347199879576c03a270ddcf862c84921419a91a100416eeedfe67282"
 dependencies = [
  "openproteo-core",
  "rusqlite",
@@ -3608,7 +3614,9 @@ dependencies = [
 
 [[package]]
 name = "openwraw"
-version = "1.0.3"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4e1919369f4626843f53b76eaddb3ff0d1406dbad6f08838d119810f7a2b6e4"
 dependencies = [
  "openproteo-core",
  "thiserror",
