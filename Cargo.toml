@@ -14,7 +14,10 @@ rust-version = "1.75"
 license = "Apache-2.0"
 authors = ["Nathan Riley <git@nathanriley.com>"]
 repository = "https://github.com/Sigilweaver/ProLance"
-homepage = "https://github.com/Sigilweaver/ProLance"
+homepage = "https://sigilweaver.app/prolance/"
+documentation = "https://sigilweaver.app/prolance/docs/"
+keywords = ["proteomics", "lance", "mass-spectrometry", "arrow", "psi-ms"]
+categories = ["science", "database", "encoding"]
 
 [workspace.dependencies]
 # Storage / Arrow
