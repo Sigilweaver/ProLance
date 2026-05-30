@@ -6,12 +6,11 @@ use prolance_ms::vendor;
 
 #[test]
 fn waters_ingest_smoke() {
-    let Some(path) = std::env::var("OPENPROTEO_WATERS_RAW")
-        .ok()
-        .filter(|p| std::path::Path::new(p).join("_FUNCTNS.INF").is_file()
+    let Some(path) = std::env::var("OPENPROTEO_WATERS_RAW").ok().filter(|p| {
+        std::path::Path::new(p).join("_FUNCTNS.INF").is_file()
             || std::path::Path::new(p).join("_extern.inf").is_file()
-            || std::path::Path::new(p).is_dir())
-    else {
+            || std::path::Path::new(p).is_dir()
+    }) else {
         eprintln!("skip: OPENPROTEO_WATERS_RAW not set");
         return;
     };

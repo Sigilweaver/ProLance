@@ -134,7 +134,13 @@ fn record_to_spectrum(run_id: &str, rec: &SpectrumRecord) -> Spectrum {
     let collision_energy = rec
         .precursor
         .as_ref()
-        .and_then(|p| if p.ce_is_nce { None } else { p.collision_energy })
+        .and_then(|p| {
+            if p.ce_is_nce {
+                None
+            } else {
+                p.collision_energy
+            }
+        })
         .map(|e| e as f32);
 
     Spectrum {
