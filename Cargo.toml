@@ -46,15 +46,17 @@ memchr = "2"
 
 # Vendor readers (path deps - sibling projects). ProLance no longer talks to
 # these directly; everything goes through `openproteo-io`. They are kept as
-# workspace deps so that openproteo-io's path resolution stays valid.
-opentfraw = { path = "../OpenTFRaw/crates/opentfraw" }
-opentimstdf = { path = "../OpenTimsTDF/crates/opentimstdf" }
-openwraw = { path = "../OpenWRaw/crates/openwraw" }
-openproteo-io = { path = "../OpenProteo/crates/openproteo-io" }
+# workspace deps so that openproteo-io's path resolution stays valid. The
+# `version` keys make `cargo publish` use the crates.io release for the
+# transitive resolution; the `path` is preferred for local dev.
+opentfraw = { version = "1.1.0", path = "../OpenTFRaw/crates/opentfraw" }
+opentimstdf = { version = "1.1.0", path = "../OpenTimsTDF/crates/opentimstdf" }
+openwraw = { version = "1.1.0", path = "../OpenWRaw/crates/openwraw" }
+openproteo-io = { version = "1.1.0", path = "../OpenProteo/crates/openproteo-io" }
 
 # Internal crates
-prolance-core = { path = "crates/prolance-core" }
-prolance-ms = { path = "crates/prolance-ms" }
+prolance-core = { version = "=0.2.0-alpha", path = "crates/prolance-core" }
+prolance-ms = { version = "=0.2.0-alpha", path = "crates/prolance-ms" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

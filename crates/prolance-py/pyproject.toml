@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "prolance"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Python bindings for ProLance (Lance-backed MS data store)"
 readme = "README.md"
 license = { text = "Apache-2.0" }
