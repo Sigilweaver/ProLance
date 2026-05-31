@@ -44,15 +44,15 @@ quick-xml = { version = "0.36", features = ["serialize"] }
 flate2 = "1"
 memchr = "2"
 
-# Vendor readers (path deps - sibling projects). ProLance no longer talks to
-# these directly; everything goes through `openproteo-io`. They are kept as
-# workspace deps so that openproteo-io's path resolution stays valid. The
-# `version` keys make `cargo publish` use the crates.io release for the
-# transitive resolution; the `path` is preferred for local dev.
-opentfraw = { version = "1.1.0", path = "../OpenTFRaw/crates/opentfraw" }
-opentimstdf = { version = "1.1.0", path = "../OpenTimsTDF/crates/opentimstdf" }
-openwraw = { version = "1.1.0", path = "../OpenWRaw/crates/openwraw" }
-openproteo-io = { version = "1.1.0", path = "../OpenProteo/crates/openproteo-io" }
+# Vendor readers. ProLance no longer talks to these directly; everything
+# goes through `openproteo-io`. They are kept as workspace deps so that
+# openproteo-io's path resolution stays valid in transitive lookups.
+# Pinned to crates.io releases (no `path =`) so `cargo publish` and CI
+# checkouts work without a sibling-repo workspace.
+opentfraw = "1.1.0"
+opentimstdf = "1.1.0"
+openwraw = "1.1.0"
+openproteo-io = "1.1.0"
 
 # Internal crates
 prolance-core = { version = "=0.2.0-alpha", path = "crates/prolance-core" }
