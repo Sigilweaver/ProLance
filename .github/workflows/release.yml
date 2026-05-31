@@ -36,7 +36,19 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install protoc
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
-      - run: cargo publish -p prolance-core
+      - name: Publish prolance-core (skip if version exists)
+        run: |
+          VERSION=$(grep -m1 '^version' crates/prolance-core/Cargo.toml | sed -E 's/.*"(.+)".*/\1/')
+          # Fall back to workspace version if not set on the crate.
+          if [ -z "$VERSION" ] || [ "$VERSION" = "workspace = true" ]; then
+            VERSION=$(grep -m1 '^version' Cargo.toml | sed -E 's/.*"(.+)".*/\1/')
+          fi
+          echo "prolance-core version: $VERSION"
+          if cargo search prolance-core --limit 1 | grep -q "^prolance-core = \"$VERSION\""; then
+            echo "prolance-core $VERSION already on crates.io, skipping publish."
+          else
+            cargo publish -p prolance-core
+          fi
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
@@ -53,7 +65,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
       # crates.io needs a moment to make prolance-core resolvable.
       - run: sleep 30
-      - run: cargo publish -p prolance-ms
+      - name: Publish prolance-ms (skip if version exists)
+        run: |
+          VERSION=$(grep -m1 '^version' Cargo.toml | sed -E 's/.*"(.+)".*/\1/')
+          echo "prolance-ms version: $VERSION"
+          if cargo search prolance-ms --limit 1 | grep -q "^prolance-ms = \"$VERSION\""; then
+            echo "prolance-ms $VERSION already on crates.io, skipping publish."
+          else
+            cargo publish -p prolance-ms
+          fi
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
