@@ -9,9 +9,7 @@ description = "Python bindings for ProLance (Lance-backed MS data store)"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.9"
-authors = [
-    { name = "Nathan Riley", email = "git@nathanriley.com" },
-]
+authors = [{ name = "Nathan Riley", email = "git@nathanriley.com" }]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: 3",
