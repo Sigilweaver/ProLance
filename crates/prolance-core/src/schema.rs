@@ -1,9 +1,9 @@
 //! Arrow schemas for the ProLance store.
 //!
 //! ProLance has three tables:
-//! - `runs`         — one row per ingested file
-//! - `spectra`      — one row per spectrum (peak arrays as list columns)
-//! - `chromatograms`— one row per chromatogram trace (TIC / BPC / SRM)
+//! - `runs` - one row per ingested file
+//! - `spectra` - one row per spectrum (peak arrays as list columns)
+//! - `chromatograms` - one row per chromatogram trace (TIC / BPC / SRM)
 
 use arrow_schema::{DataType, Field, Schema};
 use std::sync::Arc;

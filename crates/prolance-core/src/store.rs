@@ -206,7 +206,7 @@ async fn open_or_create(
     }
 }
 
-// ── Arrow conversion helpers ─────────────────────────────────────────────────
+// -- Arrow conversion helpers --
 
 fn run_to_batch(runs: &[Run]) -> Result<RecordBatch> {
     let schema = runs_schema();

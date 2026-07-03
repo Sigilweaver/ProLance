@@ -158,7 +158,7 @@ pub fn batches_to_chromatograms(batches: &[RecordBatch]) -> Vec<Chromatogram> {
     out
 }
 
-// ── column accessors ─────────────────────────────────────────────────────────
+// -- column accessors --
 
 fn col<'a, T: 'static>(b: &'a RecordBatch, name: &str) -> &'a T {
     let idx = b.schema().index_of(name).expect("missing column");

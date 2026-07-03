@@ -243,7 +243,7 @@ impl MzmlIngest {
     }
 }
 
-// ── verbatim helpers ─────────────────────────────────────────────────────────
+// -- verbatim helpers --
 
 fn looks_indexed(bytes: &[u8]) -> bool {
     memchr::memmem::find(&bytes[..bytes.len().min(4096)], b"<indexedmzML").is_some()
@@ -357,7 +357,7 @@ fn attr_value_search(haystack: &str, name_attr: &str) -> Option<String> {
     attr_value(region, "value")
 }
 
-// ── structured parsing ──────────────────────────────────────────────────────
+// -- structured parsing --
 
 fn parse_one_spectrum(xml: &str, run_id: &str) -> MsResult<Spectrum> {
     let mut spec = Spectrum {
@@ -781,7 +781,7 @@ fn bytes_to_string(b: &[u8]) -> String {
     String::from_utf8_lossy(b).into_owned()
 }
 
-// ── chromatograms ────────────────────────────────────────────────────────────
+// -- chromatograms --
 
 fn parse_chromatograms(body: &[u8], run_id: &str) -> MsResult<Vec<Chromatogram>> {
     let mut out = Vec::new();
