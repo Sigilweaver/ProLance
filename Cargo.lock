@@ -3632,9 +3632,9 @@ dependencies = [
 
 [[package]]
 name = "openwraw"
-version = "1.2.2"
+version = "1.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a81b2414914ca04a5691ac528ef0289577802df1f55a5890f9a256594d001484"
+checksum = "c1773852bc4f337064e41643c8a1649d4356d3efaccb05a6afdb875f683c1dc6"
 dependencies = [
  "openmassspec-core",
  "thiserror",
